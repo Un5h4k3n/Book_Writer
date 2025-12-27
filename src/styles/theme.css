@@ -1,0 +1,102 @@
+:root {
+  /* Muted Industrial Theme (Cyan/Blue) */
+  --bg-primary: #121416;
+  /* Cool Charcoal */
+  --bg-secondary: #1b1e22;
+  /* Slate-tinted dark */
+  --bg-tertiary: #252a30;
+  --text-primary: #e2e8f0;
+  /* Slate-200 */
+  --text-secondary: #94a3b8;
+  /* Slate-400 */
+  --text-muted: #64748b;
+  /* Slate-500 */
+  --accent-color: #0891b2;
+  /* Cyan-600 */
+  --accent-hover: #0e7490;
+  /* Cyan-700 */
+  --border-color: #334155;
+  /* Slate-700 */
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Merriweather', 'Times New Roman', serif;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='light'] {
+  --bg-primary: #f8fafc;
+  /* Slate-50 */
+  --bg-secondary: #f1f5f9;
+  /* Slate-100 */
+  --bg-tertiary: #e2e8f0;
+  /* Slate-200 */
+  --text-primary: #0f172a;
+  /* Slate-900 */
+  --text-secondary: #334155;
+  /* Slate-700 */
+  --text-muted: #64748b;
+  /* Slate-500 */
+  --accent-color: #0891b2;
+  /* Cyan-600 */
+  --accent-hover: #0e7490;
+  --border-color: #cbd5e1;
+  /* Slate-300 */
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='paper'] {
+  --bg-primary: #f4ecd8;
+  /* Cream/Sepia */
+  --bg-secondary: #e8dfc5;
+  --bg-tertiary: #dccfb0;
+  --text-primary: #3d2f26;
+  /* Dark Brown */
+  --text-secondary: #5c4d3c;
+  --text-muted: #8c7b6c;
+  --accent-color: #8b4513;
+  /* Saddle Brown */
+  --accent-hover: #6d360f;
+  --border-color: #d1c4a9;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'EB Garamond', 'Merriweather', serif;
+
+  --shadow-sm: 0 1px 2px rgba(61, 47, 38, 0.1);
+  --shadow-md: 0 4px 6px rgba(61, 47, 38, 0.1);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Scrollbar styling for dark/paper modes */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
