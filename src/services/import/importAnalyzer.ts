@@ -1,6 +1,8 @@
-import { AgentService } from '../ai/agent';
-import { useImportJobStore } from '../../stores/importJobStore';
-import { EnrichmentService } from './enrichmentService';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { AgentService } from "../ai/agent";
+import { useImportJobStore } from "../../stores/importJobStore";
+import { EnrichmentService } from "./enrichmentService";
 
 export interface ImportResult {
   chapters: {
@@ -41,8 +43,8 @@ export interface ImportResult {
 // Smaller for local models to ensure complete JSON responses
 // Larger for Gemini which has massive context windows
 const CHUNK_SIZES = {
-  ollama: 800,    // ~3,200 tokens - safe for 4K-8K context models
-  gemini: 2500    // ~10,000 tokens - Gemini handles 1M+ tokens easily
+  ollama: 800, // ~3,200 tokens - safe for 4K-8K context models
+  gemini: 2500, // ~10,000 tokens - Gemini handles 1M+ tokens easily
 };
 
 export const ImportAnalyzer = {
@@ -52,12 +54,17 @@ export const ImportAnalyzer = {
    */
   extractStructure: async (
     text: string,
-    onProgress?: (chunk: number, total: number, data: Partial<ImportResult>) => void
+    onProgress?: (
+      chunk: number,
+      total: number,
+      data: Partial<ImportResult>,
+    ) => void,
   ): Promise<ImportResult> => {
     const store = useImportJobStore.getState();
 
     // Get the configured import provider
-    const { useTokenTrackingStore } = await import('../../stores/tokenTrackingStore');
+    const { useTokenTrackingStore } =
+      await import("../../stores/tokenTrackingStore");
     const provider = useTokenTrackingStore.getState().importProvider;
 
     // 1. Chunking - Use provider-appropriate chunk size
@@ -65,33 +72,30 @@ export const ImportAnalyzer = {
     const CHUNK_SIZE = CHUNK_SIZES[provider] || CHUNK_SIZES.ollama;
     const chunks: string[] = [];
 
-    console.log(`Import: Using ${provider} with chunk size ${CHUNK_SIZE} words`);
-
     for (let i = 0; i < words.length; i += CHUNK_SIZE) {
-      chunks.push(words.slice(i, i + CHUNK_SIZE).join(' '));
+      chunks.push(words.slice(i, i + CHUNK_SIZE).join(" "));
     }
 
-    console.log(`Import: Split into ${chunks.length} chunks of ~${CHUNK_SIZE} words each`);
     store.startImport(chunks.length);
 
     const consolidated: ImportResult = {
       chapters: [],
       characters: [],
-      world: []
+      world: [],
     };
 
     // 2. Process Chunks with Progress Tracking
     for (const [index, chunk] of chunks.entries()) {
       // Check for pause
       if (store.progress.pauseRequested) {
-        console.log('Import paused at chunk', index + 1);
         while (store.progress.pauseRequested) {
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise((r) => setTimeout(r, 500));
         }
-        console.log('Import resumed');
       }
 
-      store.updateProgress({ currentChunkPreview: chunk.substring(0, 100) + '...' });
+      store.updateProgress({
+        currentChunkPreview: chunk.substring(0, 100) + "...",
+      });
 
       const prompt = `
 Extract story structure from this text segment (Part ${index + 1}/${chunks.length}).
@@ -129,9 +133,10 @@ ${chunk}
 
       try {
         const response = await AgentService.generateText({
-          systemPrompt: 'Extract story structure. Return valid JSON only. Include all chapters.',
+          systemPrompt:
+            "Extract story structure. Return valid JSON only. Include all chapters.",
           userPrompt: prompt,
-          operation: 'import'
+          operation: "import",
         });
 
         const jsonMatch = response.match(/\{[\s\S]*\}/);
@@ -142,17 +147,14 @@ ${chunk}
           const charsFound = data.characters?.length || 0;
           const worldFound = data.world?.length || 0;
 
-          console.log(`Chunk ${index + 1}/${chunks.length}: ${chaptersFound} chapters, ${charsFound} characters, ${worldFound} world items`);
-
           // INLINE ENRICHMENT: Enrich each chapter while chunk context is available
-          for (const chapter of (data.chapters || [])) {
+          for (const chapter of data.chapters || []) {
             try {
-              console.log(`  Enriching chapter: ${chapter.title}`);
               const enrichment = await EnrichmentService.inlineEnrichFromChunk(
                 chapter,
                 data.characters || [],
                 data.world || [],
-                chunk
+                chunk,
               );
 
               // Merge chapter enrichment
@@ -163,28 +165,30 @@ ${chunk}
               // Merge scene enrichments with Fuzzy + Index matching
               // AI sometimes changes scene titles (e.g. "Scene 1" vs "The Meeting")
               (enrichment.scenes || []).forEach((enrichedScene, idx) => {
-                let scene = chapter.scenes?.find((s: any) =>
-                  s.title.toLowerCase() === enrichedScene.title.toLowerCase()
+                let scene = chapter.scenes?.find(
+                  (s: any) =>
+                    s.title.toLowerCase() === enrichedScene.title.toLowerCase(),
                 );
 
                 // Fallback: If no title match, assume order matches (index-based)
                 if (!scene && chapter.scenes && chapter.scenes[idx]) {
-                  console.log(`  Merging scene by index [${idx}]: "${chapter.scenes[idx].title}" logic-linked to "${enrichedScene.title}"`);
                   scene = chapter.scenes[idx];
                 }
 
                 if (scene) {
                   Object.assign(scene, enrichedScene);
                 } else {
-                  console.warn(`  Could not match enriched scene "${enrichedScene.title}" to any extracted scene.`);
+                  console.warn(
+                    `  Could not match enriched scene "${enrichedScene.title}" to any extracted scene.`,
+                  );
                 }
               });
 
-
               // Merge character enrichments into extracted characters
-              for (const enrichedChar of (enrichment.characters || [])) {
-                const char = data.characters?.find((c: any) =>
-                  c.name.toLowerCase() === enrichedChar.name.toLowerCase()
+              for (const enrichedChar of enrichment.characters || []) {
+                const char = data.characters?.find(
+                  (c: any) =>
+                    c.name.toLowerCase() === enrichedChar.name.toLowerCase(),
                 );
                 if (char) {
                   Object.assign(char, enrichedChar);
@@ -192,16 +196,20 @@ ${chunk}
               }
 
               // Merge world item enrichments
-              for (const enrichedWorld of (enrichment.worldItems || [])) {
-                const worldItem = data.world?.find((w: any) =>
-                  w.name.toLowerCase() === enrichedWorld.name.toLowerCase()
+              for (const enrichedWorld of enrichment.worldItems || []) {
+                const worldItem = data.world?.find(
+                  (w: any) =>
+                    w.name.toLowerCase() === enrichedWorld.name.toLowerCase(),
                 );
                 if (worldItem) {
                   Object.assign(worldItem, enrichedWorld);
                 }
               }
             } catch (enrichError) {
-              console.warn(`  Enrichment failed for ${chapter.title}:`, enrichError);
+              console.warn(
+                `  Enrichment failed for ${chapter.title}:`,
+                enrichError,
+              );
             }
           }
 
@@ -226,14 +234,10 @@ ${chunk}
       store.incrementChunk();
     }
 
-    console.log(`Import: Raw totals - ${consolidated.chapters.length} chapters, ${consolidated.characters.length} characters, ${consolidated.world.length} world items`);
-
     // 3. Deduplication
     const result = ImportAnalyzer.deduplicateResults(consolidated);
 
-    console.log(`Import: After dedup - ${result.chapters.length} chapters, ${result.characters.length} characters, ${result.world.length} world items`);
-
-    store.updateProgress({ status: 'complete', phase: 2 });
+    store.updateProgress({ status: "complete", phase: 2 });
 
     return result;
   },
@@ -244,10 +248,12 @@ ${chunk}
   deduplicateResults: (data: ImportResult): ImportResult => {
     // Chapter deduplication
     const normalizeTitle = (title: string): string => {
-      const match = title.match(/chapter\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|\d+)/i);
+      const match = title.match(
+        /chapter\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|\d+)/i,
+      );
       if (match) return match[1].toLowerCase();
-      if (title.toLowerCase().includes('prologue')) return 'prologue';
-      if (title.toLowerCase().includes('epilogue')) return 'epilogue';
+      if (title.toLowerCase().includes("prologue")) return "prologue";
+      if (title.toLowerCase().includes("epilogue")) return "epilogue";
       return title.toLowerCase().trim();
     };
 
@@ -261,8 +267,10 @@ ${chunk}
           existing.summary = chapter.summary;
         }
         // Merge scenes
-        const existingTitles = new Set(existing.scenes?.map((s: any) => s.title.toLowerCase()) || []);
-        for (const scene of (chapter.scenes || [])) {
+        const existingTitles = new Set(
+          existing.scenes?.map((s: any) => s.title.toLowerCase()) || [],
+        );
+        for (const scene of chapter.scenes || []) {
           if (!existingTitles.has(scene.title.toLowerCase())) {
             existing.scenes = existing.scenes || [];
             existing.scenes.push(scene);
@@ -281,14 +289,16 @@ ${chunk}
 
     // Character deduplication
     const uniqueChars = new Map<string, any>();
-    const sortedChars = [...data.characters].sort((a, b) => b.name.length - a.name.length);
+    const sortedChars = [...data.characters].sort(
+      (a, b) => b.name.length - a.name.length,
+    );
 
     for (const char of sortedChars) {
       let foundAlias = false;
       for (const existingName of uniqueChars.keys()) {
-        const existingParts = existingName.toLowerCase().split(' ');
-        const currentParts = char.name.toLowerCase().split(' ');
-        if (currentParts.every(part => existingParts.includes(part))) {
+        const existingParts = existingName.toLowerCase().split(" ");
+        const currentParts = char.name.toLowerCase().split(" ");
+        if (currentParts.every((part) => existingParts.includes(part))) {
           foundAlias = true;
           break;
         }
@@ -300,7 +310,7 @@ ${chunk}
 
     // World item deduplication
     const uniqueWorld = new Map<string, any>();
-    data.world.forEach(w => {
+    data.world.forEach((w) => {
       if (!uniqueWorld.has(w.name.toLowerCase())) {
         uniqueWorld.set(w.name.toLowerCase(), w);
       }
@@ -309,12 +319,12 @@ ${chunk}
     return {
       chapters: sortedChapters,
       characters: Array.from(uniqueChars.values()),
-      world: Array.from(uniqueWorld.values())
+      world: Array.from(uniqueWorld.values()),
     };
   },
 
   // Legacy method for backwards compatibility
   analyzeOverview: async (text: string) => {
     return ImportAnalyzer.extractStructure(text);
-  }
+  },
 };

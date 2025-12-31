@@ -18,14 +18,14 @@
   --border-color: #334155;
   /* Slate-700 */
 
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-serif: 'Merriweather', 'Times New Roman', serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Merriweather", "Times New Roman", serif;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
-[data-theme='light'] {
+[data-theme="light"] {
   --bg-primary: #f8fafc;
   /* Slate-50 */
   --bg-secondary: #f1f5f9;
@@ -48,7 +48,7 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-[data-theme='paper'] {
+[data-theme="paper"] {
   --bg-primary: #f4ecd8;
   /* Cream/Sepia */
   --bg-secondary: #e8dfc5;
@@ -61,8 +61,8 @@
   /* Saddle Brown */
   --accent-hover: #6d360f;
   --border-color: #d1c4a9;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-serif: 'EB Garamond', 'Merriweather', serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "EB Garamond", "Merriweather", serif;
 
   --shadow-sm: 0 1px 2px rgba(61, 47, 38, 0.1);
   --shadow-md: 0 4px 6px rgba(61, 47, 38, 0.1);
@@ -72,7 +72,9 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   margin: 0;
   padding: 0;
   line-height: 1.6;
