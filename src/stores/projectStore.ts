@@ -119,6 +119,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       // We can't easily delete subcollections from client SDK without recursion.
       // Just deleting the project doc is a 'soft' delete effectively for the list.
       const { db } = await import("../services/firebase");
+      if (!db) return;
       const ref = doc(db, "projects", id);
       await deleteDoc(ref);
     });

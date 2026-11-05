@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local credentials and private writing/import fixtures
+.env
+.env.*
+!.env.example
+/Test_Docs/
+*.pem
+*.key
+*service-account*.json
+*serviceAccount*.json

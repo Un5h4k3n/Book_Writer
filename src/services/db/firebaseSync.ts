@@ -10,6 +10,7 @@ export const saveProjectToCloud = async (
   chapters: Chapter[],
 ): Promise<void> => {
   if (!project) return;
+  if (!firestore) throw new Error("Configure your own Firebase project to enable cloud sync.");
 
   const batch = writeBatch(firestore);
   const projectRef = doc(firestore, "projects", project.id);
@@ -48,6 +49,7 @@ const saveEntity = async (
   collectionName: string,
   entity: any,
 ) => {
+  if (!firestore) return;
   try {
     const ref = doc(
       firestore,
@@ -69,6 +71,7 @@ const deleteEntity = async (
   collectionName: string,
   entityId: string,
 ) => {
+  if (!firestore) return;
   try {
     const ref = doc(firestore, "projects", projectId, collectionName, entityId);
     await import("firebase/firestore").then(({ deleteDoc }) => deleteDoc(ref));
@@ -93,6 +96,7 @@ export const removeChapter = (projectId: string, chapId: string) =>
   deleteEntity(projectId, "chapters", chapId);
 
 export const syncProjectMetadata = async (project: Project) => {
+  if (!firestore) return;
   try {
     const ref = doc(firestore, "projects", project.id);
     await import("firebase/firestore").then(({ setDoc }) =>
